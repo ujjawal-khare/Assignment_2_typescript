@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css" />
+  <style>
+    .success, .error {
+      color: white;
+      padding: 5px;
+      margin: 5px 0 15px 0;
+    }
+
+    .success {
+      background: green;
+    }
+
+    .error {
+      background: red;
+    }
+
+    .expense {
+      background: orangered;
+    }
+
+    .income {
+      background: green;
+    }
+
+    .delete {
+        color: black;
+      text-decoration: none;
+    }
+  </style>
+    <title>Income Expense Calculator</title>
+</head>
+
+<body>
+    <div class = "container">
+        <h1>Income and expense Manager</h1>
+        <!-- <div id = 'file-upload'>
+            <label for = "Csv file"> Transaction csv file  </label>
+            <input type = "file" accept = ".csv" id = "csv-file" class = "u-full-width">
+        </div> -->
+
+        <form id = 'data-form'>
+            <div id = 'data-info'>
+                <label for = "Expense/Income data"> Enter the csv info here </label>
+                <input type = "text"  id = "data" class = "u-full-width">
+            </div>
+
+            <div>
+                <input type="submit" value="Submit" class="u-full-width">
+              </div>
+        </form>
+
+        <table id ='data-table' class = "u-full-width">
+            <thead>
+                <tr>
+                    <th>Transaction Type</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id = 'transaction-list'> </tbody>
+        </table>
+        
+        <div>
+            <div id = 'total-income'> </div>
+            <div id = 'avg-income'> </div>
+            <div id = 'total-expense'> </div>
+            <div id = 'avg-expense'> </div>
+        </div>
+    </div>
+    
+    <script src = 'appes6.js'></script>
+</body>
+</html>
