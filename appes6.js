@@ -194,39 +194,79 @@ class Sorting {
     }
 }
 class Filter {
+    // public totalIncome : number;
+    // public avgIncome : number;
+    // public totalExpense : number;
+    // public avgExpense : number;
     constructor() {
         this.table = document.getElementById('data-table');
         this.rows = this.table.rows;
+        // this.totalExpense = 0;
+        // this.totalIncome = 0;
+        // this.avgExpense = 0;
+        // this.avgIncome = 0;
+    }
+    ComputeData(IE, amount) {
+        if (IE === 'I') {
+            meta_data.totalIncome += amount;
+            meta_data.incomeNumbers++;
+        }
+        else if (IE === 'E') {
+            meta_data.totalExpense += amount;
+            meta_data.expenseNumbers++;
+        }
     }
     ShowAllData() {
         for (let i = 1; i < this.rows.length; i++) {
             this.rows[i].style.display = '';
+            let IE = String(this.rows[i].getElementsByTagName("TD")[0].innerHTML).trim();
+            let amount = Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML);
+            this.ComputeData(IE, amount);
         }
     }
     ShowIEFilter(showIE) {
         for (let i = 1; i < this.rows.length; i++) {
-            if (String(this.rows[i].getElementsByTagName("TD")[0].innerHTML).trim() !== showIE) {
+            let IE = String(this.rows[i].getElementsByTagName("TD")[0].innerHTML).trim();
+            let amount = Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML);
+            if (IE !== showIE) {
                 this.rows[i].style.display = 'none';
+            }
+            else {
+                this.ComputeData(IE, amount);
             }
         }
     }
     ShowAmountFilter(sign, amount) {
         if (sign === '<') {
             for (let i = 1; i < this.rows.length; i++) {
-                if (Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML) >= amount) {
+                let IE = String(this.rows[i].getElementsByTagName("TD")[0].innerHTML).trim();
+                let cellAmount = Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML);
+                if (cellAmount >= amount) {
                     this.rows[i].style.display = 'none';
+                }
+                else {
+                    this.ComputeData(IE, cellAmount);
                 }
             }
         }
         else if (sign === '>') {
             for (let i = 1; i < this.rows.length; i++) {
+                let IE = String(this.rows[i].getElementsByTagName("TD")[0].innerHTML).trim();
+                let cellAmount = Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML);
                 if (Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML) <= amount) {
                     this.rows[i].style.display = 'none';
+                }
+                else {
+                    this.ComputeData(IE, cellAmount);
                 }
             }
         }
     }
     FilterBy(param, param_code) {
+        meta_data.totalIncome = 0;
+        meta_data.incomeNumbers = 0;
+        meta_data.totalExpense = 0;
+        meta_data.expenseNumbers = 0;
         if (param === 'None') {
             this.ShowAllData();
         }
@@ -245,6 +285,8 @@ class Filter {
         else if (param === 'GreaterThanLakh') {
             this.ShowAmountFilter('>', 100000);
         }
+        meta_data.ShowExpenseData();
+        meta_data.ShowIncomeData();
     }
 }
 function EventListeners() {
