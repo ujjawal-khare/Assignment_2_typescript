@@ -116,9 +116,6 @@ class ValidateData{
             return false;
         }
 
-        // if(rows.length == 1){
-            
-        // }
         for(let i = 1; i< rows.length ;i++)
         {
             let data = rows[i].split(',');
@@ -143,7 +140,6 @@ class ValidateData{
 }
 
 class UI {
-
     csvInputElement : HTMLInputElement;
     constructor(){
         this.csvInputElement = document.getElementById('data') as HTMLInputElement;
@@ -199,6 +195,7 @@ class UI {
             targetButton.parentElement!.parentElement!.remove();
         }
     }
+
     //Clearing default fields
     ClearField() {
         this.csvInputElement.value = <string> '';
@@ -258,23 +255,63 @@ class Sorting {
 }
 
 class Filter{
-    FilterBy(param: string, param_code: number){
-        let table: HTMLTableElement = document.getElementById('data-table') as HTMLTableElement;
-        let rows = table.rows;
+    public table: HTMLTableElement;
+    public rows : HTMLCollectionOf<HTMLTableRowElement>;
+    
+    constructor(){
+        this.table = document.getElementById('data-table') as HTMLTableElement;
+        this.rows = this.table.rows;
+    }
 
-        if(param === 'OnlyIncome') {
-            for (let i = 1; i < (rows.length - 1); i++){
-                if(rows[i].getElementsByTagName("TD")[0].innerHTML !== 'I'){
-                    rows[i].style.display = 'none';
-                }
-            } 
+    ShowAllData(){
+        for (let i = 1; i < this.rows.length; i++){
+            this.rows[i].style.display = '';    
         }
-        else if(param === 'OnlyExpense') {
-            for (let i = 1; i < (rows.length - 1); i++){
-                if(rows[i].getElementsByTagName("TD")[0].innerHTML !== 'E'){
-                    rows[i].style.display = 'none';
+    }
+    ShowIEFilter(showIE: string){
+        for (let i = 1; i < this.rows.length; i++){
+            if(String(this.rows[i].getElementsByTagName("TD")[0].innerHTML).trim() !== showIE){
+                this.rows[i].style.display = 'none';
+            }
+        }
+    }
+
+    ShowAmountFilter(sign: string, amount: number){
+        if(sign === '<'){
+            for (let i = 1; i < this.rows.length ; i++){
+                if(Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML) >= amount){
+                    this.rows[i].style.display = 'none';
                 }
             }
+        }
+        else if(sign === '>') {
+            for (let i = 1; i < this.rows.length ; i++){
+                if(Number(this.rows[i].getElementsByTagName("TD")[3].innerHTML) <= amount){
+                    this.rows[i].style.display = 'none';
+                }
+            }
+        }
+    }
+
+    FilterBy(param: string, param_code: number){
+       
+        if(param === 'None'){
+            this.ShowAllData();
+        }
+        else if(param === 'OnlyIncome') {
+             this.ShowIEFilter('I');
+        } 
+        else if(param === 'OnlyExpense') {
+            this.ShowIEFilter('E');
+        } 
+        else if(param === 'LessThanThousand') {
+            this.ShowAmountFilter('<', 1000);
+        } 
+        else if(param === 'LessThanLakh') {
+            this.ShowAmountFilter('<', 100000);
+        }
+        else if(param === 'GreaterThanLakh') {
+            this.ShowAmountFilter('>', 100000);
         }
     }
 }
@@ -343,31 +380,31 @@ function EventListeners() :void {
         else 
             param_code = -1;
         
-        if(param_code !==-1)
-            sorting.SortTable(param, param_code);
+        
+        sorting.SortTable(param, param_code);
         e.preventDefault();
     });
 
 
     // To filter the data
-    // document.getElementById('sort-info')!.addEventListener('click', function(e){
-    //     let param: string = (document.getElementById('filter-info')! as HTMLInputElement).value;
-    //     console.log(param);
-    //     let param_code: number;
-    //     const filter = new Filter();
+    document.getElementById('filter-info')!.addEventListener('click', function(e){
+        let param: string = (document.getElementById('filter-info')! as HTMLInputElement).value;
+        //console.log(param);
+        let param_code: number;
+        const filter = new Filter();
+        
+        filter.ShowAllData();
+        if(param === 'OnlyIncome' || param === 'OnlyExpense' )
+            param_code = 0;
+        else if(param === 'LessThanThousand' || param === 'LessThanLakh' || param === 'GreaterThanLakh')
+            param_code = 3;
+        else
+            param_code = -1;
 
-    //     if(param === 'OnlyIncome' || param === 'OnlyExpense' )
-    //         param_code = 0;
-    //     else if(param === 'LessThanThousand' || param === 'LessThanLakh' || param === 'GreaterThanLakh')
-    //         param_code = 3;
-    //     else
-    //         param_code = -1;
+        filter.FilterBy(param, param_code);
 
-    //     if(param_code !== -1)
-    //         filter.FilterBy(param, param_code);
-
-    //     e.preventDefault();
+        e.preventDefault();
     
-    // });
+    });
 }
 EventListeners();
