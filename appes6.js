@@ -1,5 +1,6 @@
-var MetaData = /** @class */ (function () {
-    function MetaData() {
+"use strict";
+class MetaData {
+    constructor() {
         this.idAmountMap = new Map();
         this.totalNumbers = 0;
         this.totalIncome = 0;
@@ -10,147 +11,154 @@ var MetaData = /** @class */ (function () {
         this.totalAvgIncomeDivElement = document.getElementById('avg-income');
         this.totalExpenseDivElement = document.getElementById('total-expense');
         this.totalAvgExpenseDivElement = document.getElementById('avg-expense');
-        this.totalIncomeDivElement.innerHTML = "Total income: " + this.totalIncome;
-        this.totalAvgIncomeDivElement.innerHTML = "Average income: 0";
-        this.totalExpenseDivElement.innerHTML = "Total expense: " + this.totalExpense;
-        this.totalAvgExpenseDivElement.innerHTML = "Average expense: 0";
+        this.totalIncomeDivElement.innerHTML = `Total income: ${this.totalIncome}`;
+        this.totalAvgIncomeDivElement.innerHTML = `Average income: 0`;
+        this.totalExpenseDivElement.innerHTML = `Total expense: ${this.totalExpense}`;
+        this.totalAvgExpenseDivElement.innerHTML = `Average expense: 0`;
     }
-    MetaData.prototype.ShowIncomeData = function () {
-        this.totalIncomeDivElement.innerHTML = "Total income: " + this.totalIncome;
-        this.totalAvgIncomeDivElement.innerHTML = "Average income: " + (this.totalIncome === 0 ? 0 : this.totalIncome / this.incomeNumbers);
-    };
-    MetaData.prototype.ShowExpenseData = function () {
-        this.totalExpenseDivElement.innerHTML = "Total expense: " + this.totalExpense;
-        this.totalAvgExpenseDivElement.innerHTML = "Average expense: " + (this.totalExpense === 0 ? 0 : this.totalExpense / this.expenseNumbers);
-    };
-    MetaData.prototype.AddIncome = function (amount) {
+    ShowIncomeData() {
+        this.totalIncomeDivElement.innerHTML = `Total income: ${this.totalIncome}`;
+        this.totalAvgIncomeDivElement.innerHTML = `Average income: ${(this.totalIncome === 0 ? 0 : this.totalIncome / this.incomeNumbers)}`;
+    }
+    ShowExpenseData() {
+        this.totalExpenseDivElement.innerHTML = `Total expense: ${this.totalExpense}`;
+        this.totalAvgExpenseDivElement.innerHTML = `Average expense: ${(this.totalExpense === 0 ? 0 : this.totalExpense / this.expenseNumbers)}`;
+    }
+    AddIncome(amount) {
         this.totalIncome += Number(amount);
         this.incomeNumbers++;
         meta_data.ShowIncomeData();
-    };
-    MetaData.prototype.AddExpense = function (amount) {
+    }
+    AddExpense(amount) {
         this.totalExpense += Number(amount);
         this.expenseNumbers++;
         meta_data.ShowExpenseData();
-    };
-    MetaData.prototype.DeleteIncome = function (amount) {
+    }
+    DeleteIncome(amount) {
         this.totalIncome -= Number(amount);
         this.incomeNumbers--;
         meta_data.ShowIncomeData();
-    };
-    MetaData.prototype.DeleteExpense = function (amount) {
+    }
+    DeleteExpense(amount) {
         this.totalExpense -= Number(amount);
         this.expenseNumbers--;
         meta_data.ShowExpenseData();
-    };
-    return MetaData;
-}());
-var meta_data = new MetaData();
-var Transaction = /** @class */ (function () {
-    function Transaction(transactionType, description, amount) {
+    }
+}
+const meta_data = new MetaData();
+class Transaction {
+    constructor(transactionType, date, description, amount) {
         meta_data.idAmountMap.set(meta_data.totalNumbers, amount);
         this.id = meta_data.totalNumbers;
         this.transactionType = transactionType;
+        this.date = date;
         this.description = description;
         this.amount = amount;
         meta_data.totalNumbers += 1;
     }
-    return Transaction;
-}());
-var Validate_data = /** @class */ (function () {
-    function Validate_data() {
-    }
-    Validate_data.prototype.Validate = function (val) {
-        var rows = String(val.split('\n'));
-        var data = rows.split(',');
-        if (data[0] === '' || data[1] === '' || data[2] === '') {
+}
+class Validate_data {
+    Validate(val) {
+        let rows = val.split('\n');
+        let header = rows[0].split(',');
+        const ui = new UI();
+        if (header[0] !== 'I/E' || header[1] !== 'Date' || header[2] !== 'Name' || header[3] !== 'Amount') {
+            console.log(header);
+            ui.ShowAlert('Incorrect header of CSV', 'error');
             return false;
         }
-        if (data.length !== 3) {
-            //alert("Please enter valid csv data");
-            return false;
+        if (rows.length == 1) {
         }
-        // console.log("val " +  typeof(val));
-        // for(let i=0;i<val.length;i++)
-        // {
-        //     if(val[i].length != 1){
-        //         alert("Please enter valid csv data");
-        //         return false;
-        //     }
-        // }
+        for (let i = 1; i < rows.length; i++) {
+            let data = rows[i].split(',');
+            if (data[0] === '' || data[1] === '' || data[2] === '' || data[3] === '') {
+                ui.ShowAlert("Data missing at line " + i, 'error');
+                return false;
+            }
+            if (data[0] !== 'I' && data[0] !== 'E') {
+                ui.ShowAlert('Incorrect data at line ' + i, 'error');
+                return false;
+            }
+            if (isNaN(Number(data[3])) && Number(data[3]) < 0) {
+                ui.ShowAlert('Please enter valid amount', 'error');
+                return false;
+            }
+        }
         return true;
-    };
-    return Validate_data;
-}());
-var UI = /** @class */ (function () {
-    function UI() {
+    }
+}
+class UI {
+    constructor() {
         this.csvInputElement = document.getElementById('data');
     }
-    UI.prototype.AddTransaction = function (transaction) {
-        var list = document.getElementById('transaction-list');
-        var newRow = document.createElement('tr');
-        newRow.className = "" + transaction.transactionType;
-        newRow.innerHTML = "\n            <td > " + transaction.transactionType + " </td>\n            <td> " + transaction.description + " </td>\n            <td> " + transaction.amount + " </td>\n            <td> <a href = '#' class = 'delete' id=" + transaction.id + " > Delete </a></td>";
+    AddTransaction(transaction) {
+        const list = document.getElementById('transaction-list');
+        const newRow = document.createElement('tr');
+        newRow.className = `${transaction.transactionType}`;
+        newRow.innerHTML = `
+            <td> ${transaction.transactionType} </td>
+            <td> ${transaction.date} </td>
+            <td> ${transaction.description} </td>
+            <td> ${transaction.amount} </td>
+            <td> <a href = '#' class = 'delete' id=${transaction.id} > Delete </a></td>`;
         list.appendChild(newRow);
-        if (transaction.transactionType === 'income') {
+        if (transaction.transactionType === 'I') {
             meta_data.AddIncome(transaction.amount);
         }
-        else {
+        else if (transaction.transactionType === 'E') {
             meta_data.AddExpense(transaction.amount);
         }
-    };
+    }
     // Showing alert on the page
-    UI.prototype.ShowAlert = function (message, className) {
-        var div = document.createElement('div');
-        div.className = "alert " + className;
+    ShowAlert(message, className) {
+        const div = document.createElement('div');
+        div.className = `alert ${className}`;
         div.appendChild(document.createTextNode(message));
-        var container = document.querySelector('.container');
-        var form = document.querySelector('#data-form');
+        const container = document.getElementById('container');
+        const form = document.getElementById('data-form');
         container.insertBefore(div, form);
         setTimeout(function () {
             document.querySelector('.alert').remove();
         }, 3000);
-    };
-    UI.prototype.DeleteData = function (target) {
+    }
+    DeleteData(target) {
         if (target.className === 'delete') {
-            if (target.parentElement.parentElement.className === 'income') {
+            if (target.parentElement.parentElement.className === 'I') {
                 meta_data.DeleteIncome(meta_data.idAmountMap.get(Number(target.id)));
             }
-            else if (target.parentElement.parentElement.className === 'expense') {
+            else if (target.parentElement.parentElement.className === 'E') {
                 meta_data.DeleteExpense(meta_data.idAmountMap.get(Number(target.id)));
             }
             target.parentElement.parentElement.remove();
         }
-    };
+    }
     //Clearing default fields
-    UI.prototype.ClearField = function () {
+    ClearField() {
         this.csvInputElement.value = '';
-    };
-    return UI;
-}());
-// Submit event
+    }
+}
 function EventListeners() {
-    var dataInputElement = document.getElementById('data');
-    var doc = '';
+    let dataInputElement = document.getElementById('data');
+    // Submit event
+    let doc = '';
     document.getElementById('data-form').addEventListener('submit', function (e) {
         doc = dataInputElement.value;
-        console.log(typeof (doc));
-        var valid = new Validate_data();
-        var isValid = true;
+        const valid = new Validate_data();
         // Not checking csv data for now
-        //let isValid = valid.Validate(doc);
-        var ui = new UI();
+        let isValid = valid.Validate(doc);
+        const ui = new UI();
         if (!isValid) {
-            ui.ShowAlert('Please enter valid data', 'error');
+            ui.ShowAlert('Please enter data again', 'error');
         }
         else {
-            var rows = doc.split(' ');
-            for (var i = 1; i < rows.length; i++) {
-                var data = rows[i].split(',');
-                var transactionType = data[0];
-                var description = data[1];
-                var amount = data[2];
-                var transaction = new Transaction(transactionType, description, amount);
+            let rows = doc.split('\n');
+            for (let i = 1; i < rows.length; i++) {
+                let data = rows[i].split(',');
+                let transactionType = data[0];
+                let date = data[1];
+                let description = data[2];
+                let amount = Number(data[3]);
+                const transaction = new Transaction(transactionType, date, description, amount);
                 ui.AddTransaction(transaction);
             }
             ui.ClearField();
@@ -160,10 +168,38 @@ function EventListeners() {
     });
     // To delete the data
     document.getElementById('transaction-list').addEventListener('click', function (e) {
-        var ui = new UI();
+        const ui = new UI();
         ui.DeleteData(e.target);
         ui.ShowAlert('Transaction deleted', 'success');
         e.preventDefault();
     });
+    // To sort the data
+    // document.getElementById('sort-info')!.addEventListener('change', function(e){
+    //     console.log((document.getElementById('sort-info')! as HTMLInputElement).value);
+    //     let sortParam : string =  (document.getElementById('sort-info') as HTMLInputElement).value;
+    //     let table: HTMLTableElement = document.getElementById('data-list');
+    //     let switching = true;
+    //     let shouldSwitch: boolean;
+    //     let i: number;
+    //     let x,y;
+    //     while(switching){
+    //         let rows = table.rows;
+    //         switching = false;
+    //         for (i = 1; i < (rows.length - 1); i++) {
+    //             shouldSwitch = false;
+    //             x = rows[i].getElementsByTagName("TD")[0];
+    //             y = rows[i + 1].getElementsByTagName("TD")[0];
+    //             console.log(x);
+    //             if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+    //               shouldSwitch = true;
+    //               break;
+    //             }
+    //           }
+    //           if (shouldSwitch) {
+    //             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+    //             switching = true;
+    //           }
+    //     }
+    // });
 }
 EventListeners();

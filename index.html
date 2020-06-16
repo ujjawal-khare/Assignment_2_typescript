@@ -20,11 +20,11 @@
       background: red;
     }
 
-    .expense {
+    .E {
       background: orangered;
     }
 
-    .income {
+    .I {
       background: green;
     }
 
@@ -32,12 +32,16 @@
         color: black;
       text-decoration: none;
     }
+
+    #sort-options {
+      right: 10%;
+    }
   </style>
     <title>Income Expense Calculator</title>
 </head>
 
 <body>
-    <div class = "container">
+    <div class = "container" id = 'container'>
         <h1>Income and expense Manager</h1>
         <!-- <div id = 'file-upload'>
             <label for = "Csv file"> Transaction csv file  </label>
@@ -46,8 +50,8 @@
 
         <form id = 'data-form'>
             <div id = 'data-info'>
-                <label for = "Expense/Income data"> Enter the csv info here </label>
-                <input type = "text"  id = "data" class = "u-full-width">
+                <label for = "Expense/Income data"> Enter the csv data here </label>
+                <textarea type = "text"  id = "data" class = "u-full-width"> </textarea>
             </div>
 
             <div>
@@ -55,10 +59,20 @@
               </div>
         </form>
 
+        <lable for = 'sort'> Sortby </lable>
+        <select name = 'sortby' id = 'sort-info'>
+          <option value = 'None'>None</option>
+          <option value = 'I/E'>I/E</option>
+          <option value = 'Date'>Date</option>
+          <option value = 'Description'>Description</option>
+          <option value = 'Amount'>Amount</option>
+        </select>        
+
         <table id ='data-table' class = "u-full-width">
             <thead>
                 <tr>
                     <th>Transaction Type</th>
+                    <th>Date</th>
                     <th>Description</th>
                     <th>Amount</th>
                 </tr>
