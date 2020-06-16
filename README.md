@@ -12,7 +12,7 @@ Income/Expense manager in typescript
  - [x] Show total/average income and expenses below the table.
  - [x] Upon adding a CSV in the input box again, append the new data to an existing table.
  - [x] Put buttons to sort the table along with each column.
- - [ ] Put filter dropdowns to apply certain filters.
+ - [x] Put filter dropdowns to apply certain filters. Average/Total Income/Expense not done.
 
  ## Instructions
  Run with tsc --project tsconfig.json command on the terminal
