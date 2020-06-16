@@ -19,26 +19,36 @@ class MetaData{
         this.incomeNumbers = 0;
         this.expenseNumbers = 0;
 
-        this.totalIncomeDivElement  = document.getElementById('total-income')! as HTMLDivElement ;
-        this.totalAvgIncomeDivElement = document.getElementById('avg-income')! as HTMLDivElement;
-        this.totalExpenseDivElement = document.getElementById('total-expense')! as HTMLDivElement;
-        this.totalAvgExpenseDivElement = document.getElementById('avg-expense')! as HTMLDivElement;
+        this.totalIncomeDivElement  = document.getElementById
+        ('total-income')! as HTMLDivElement ;
+        this.totalAvgIncomeDivElement = document.getElementById
+        ('avg-income')! as HTMLDivElement;
+        this.totalExpenseDivElement = document.getElementById
+        ('total-expense')! as HTMLDivElement;
+        this.totalAvgExpenseDivElement = document.getElementById
+        ('avg-expense')! as HTMLDivElement;
 
-        this.totalIncomeDivElement.innerHTML = `Total income: ${this.totalIncome}`;
+        this.totalIncomeDivElement.innerHTML = `Total income:
+         ${this.totalIncome}`;
         this.totalAvgIncomeDivElement.innerHTML = `Average income: 0`;
-        this.totalExpenseDivElement.innerHTML = `Total expense: ${this.totalExpense}`;
+        this.totalExpenseDivElement.innerHTML = `Total expense:
+         ${this.totalExpense}`;
         this.totalAvgExpenseDivElement.innerHTML = `Average expense: 0`;
 
     }
 
     ShowIncomeData() : void{
-        this.totalIncomeDivElement.innerHTML = `Total income: ${this.totalIncome}`;
-        this.totalAvgIncomeDivElement.innerHTML = `Average income: ${(this.totalIncome  ===0 ? 0 : this.totalIncome/this.incomeNumbers)}`;
+        this.totalIncomeDivElement.innerHTML = `Total income:
+         ${this.totalIncome}`;
+        this.totalAvgIncomeDivElement.innerHTML = `Average income:
+         ${(this.totalIncome  ===0 ? 0 : this.totalIncome/this.incomeNumbers)}`;
     }
 
     ShowExpenseData() : void {
-        this.totalExpenseDivElement.innerHTML = `Total expense: ${this.totalExpense}`;
-         this.totalAvgExpenseDivElement.innerHTML = `Average expense: ${(this.totalExpense===0 ? 0: this.totalExpense/this.expenseNumbers)}`;
+        this.totalExpenseDivElement.innerHTML = `Total expense:
+         ${this.totalExpense}`;
+         this.totalAvgExpenseDivElement.innerHTML = `Average expense:
+          ${(this.totalExpense===0 ? 0: this.totalExpense/this.expenseNumbers)}`;
     }
 
     AddIncome(amount: Number) {
@@ -68,7 +78,6 @@ class MetaData{
         this.expenseNumbers--;
         meta_data.ShowExpenseData();
     }
-    
 }
 
 const meta_data = new MetaData();
@@ -80,7 +89,8 @@ class Transaction{
     public date: string;
     public amount : number;
     
-    constructor(transactionType: string, date: string, description: string, amount:number) {
+    constructor(transactionType: string, date: string, 
+        description: string, amount:number) {
         meta_data.idAmountMap.set(meta_data.totalNumbers, amount);
         this.id = meta_data.totalNumbers;
         this.transactionType = transactionType;
@@ -91,7 +101,7 @@ class Transaction{
     }
 }
 
-class Validate_data{
+class ValidateData{
     Validate (val: string) {
     
         let rows = val.split('\n');
@@ -99,19 +109,21 @@ class Validate_data{
 
         const ui = new UI();
 
-        if(header[0] !== 'I/E' || header[1] !== 'Date' || header[2] !=='Name' || header[3] !== 'Amount' ){
+        if(header[0] !== 'I/E' || header[1] !== 'Date' || header[2] !=='Name'
+         || header[3] !== 'Amount' ){
             console.log(header);
             ui.ShowAlert('Incorrect header of CSV', 'error');
             return false;
         }
 
-        if(rows.length == 1){
+        // if(rows.length == 1){
             
-        }
+        // }
         for(let i = 1; i< rows.length ;i++)
         {
             let data = rows[i].split(',');
-            if(data[0 ]=== '' || data[1] === '' || data[2] === '' || data[3] === '') {
+            if(data[0 ]=== '' || data[1] === '' || data[2] === '' ||
+             data[3] === '') {
                 ui.ShowAlert("Data missing at line " + i, 'error');
                 return false;
             }
@@ -126,8 +138,6 @@ class Validate_data{
                 return false;
             }
         }
-    
-           
     return true;
     }
 }
@@ -177,6 +187,7 @@ class UI {
     
     DeleteData(target : EventTarget) {
         let targetButton = target as HTMLButtonElement;
+        
         if(targetButton.className === 'delete' && targetButton.id !== undefined){
             if((target as HTMLButtonElement).parentElement!.parentElement!.className === 'I'){
                 meta_data.DeleteIncome(meta_data.idAmountMap.get(Number(targetButton.id)));
@@ -194,6 +205,80 @@ class UI {
     }
 }
 
+
+class Sorting {
+    constructor(){};
+    Compare (param:string, x : Element , y : Element) : boolean {
+        if((param === 'I/E' || param === 'Description') 
+        && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            return true;
+        }
+
+        if(param === 'Date') {
+            let date1 = x.innerHTML.split('/');
+            let date2 = y.innerHTML.split('/');
+            if( (date1[2].trim() + date1[1].trim() + date1[0].trim()) > (date2[2].trim() + date2[1].trim() + date2[0].trim()) )
+                return true;
+        }
+
+        if(param === 'Amount' && Number(x.innerHTML) > Number(y.innerHTML)){
+            return true;
+        }
+        return false;
+    }
+
+    SortTable(param: string, code: number): void{
+        let sortParam : string =  (document.getElementById('sort-info') as HTMLInputElement).value;
+        let table: HTMLTableElement = document.getElementById('data-table') as HTMLTableElement;
+        let switching : boolean = true;
+        let shouldSwitch: boolean = false;
+        let i: number;
+        let x,y;
+
+    while(switching){
+        let rows = table.rows;
+        switching = false;
+
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[code];
+            y = rows[i + 1].getElementsByTagName("TD")[code];
+            
+            if (this.Compare(param, x , y)) {
+                shouldSwitch = true;
+                break;
+            }
+            }
+            if (shouldSwitch) {
+            rows[i].parentNode!.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            }
+        }
+    }
+}
+
+class Filter{
+    FilterBy(param: string, param_code: number){
+        let table: HTMLTableElement = document.getElementById('data-table') as HTMLTableElement;
+        let rows = table.rows;
+
+        if(param === 'OnlyIncome') {
+            for (let i = 1; i < (rows.length - 1); i++){
+                if(rows[i].getElementsByTagName("TD")[0].innerHTML !== 'I'){
+                    rows[i].style.display = 'none';
+                }
+            } 
+        }
+        else if(param === 'OnlyExpense') {
+            for (let i = 1; i < (rows.length - 1); i++){
+                if(rows[i].getElementsByTagName("TD")[0].innerHTML !== 'E'){
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+    }
+}
+
 function EventListeners() :void {
     
     let dataInputElement = <HTMLInputElement> document.getElementById('data') as HTMLInputElement;
@@ -204,7 +289,7 @@ function EventListeners() :void {
     function(e) {
         doc = <string> dataInputElement.value;
         
-        const valid = new Validate_data();
+        const valid = new ValidateData();
         let isValid = valid.Validate(doc);
         const ui = new UI();
         if(!isValid){
@@ -242,40 +327,47 @@ function EventListeners() :void {
     });
 
     // To sort the data
-    // document.getElementById('sort-info')!.addEventListener('change', function(e){
-    //     console.log((document.getElementById('sort-info')! as HTMLInputElement).value);
+    document.getElementById('sort-info')!.addEventListener('click', function(e){
+        let param: string = (document.getElementById('sort-info')! as HTMLInputElement).value;
+        let param_code : number;
+        const sorting = new Sorting();
 
-    //     let sortParam : string =  (document.getElementById('sort-info') as HTMLInputElement).value;
-    //     let table: HTMLTableElement = document.getElementById('data-list');
-    //     let switching = true;
-    //     let shouldSwitch: boolean;
-    //     let i: number;
-    //     let x,y;
-
-    //     while(switching){
-    //         let rows = table.rows;
-    //         switching = false;
-
-    //         for (i = 1; i < (rows.length - 1); i++) {
-    //             shouldSwitch = false;
-    //             x = rows[i].getElementsByTagName("TD")[0];
-    //             y = rows[i + 1].getElementsByTagName("TD")[0];
-                
-    //             console.log(x);
-    //             if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-    //               shouldSwitch = true;
-    //               break;
-    //             }
-    //           }
-    //           if (shouldSwitch) {
-    //             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-    //             switching = true;
-    //           }
-    //     }
+        if(param === 'I/E')
+            param_code = 0;
+        else if(param === 'Date')
+            param_code = 1;
+        else if(param === 'Description')
+            param_code = 2;
+        else if(param === 'Amount')
+            param_code = 3;
+        else 
+            param_code = -1;
+        
+        if(param_code !==-1)
+            sorting.SortTable(param, param_code);
+        e.preventDefault();
+    });
 
 
-    // });
+    // To filter the data
+    // document.getElementById('sort-info')!.addEventListener('click', function(e){
+    //     let param: string = (document.getElementById('filter-info')! as HTMLInputElement).value;
+    //     console.log(param);
+    //     let param_code: number;
+    //     const filter = new Filter();
+
+    //     if(param === 'OnlyIncome' || param === 'OnlyExpense' )
+    //         param_code = 0;
+    //     else if(param === 'LessThanThousand' || param === 'LessThanLakh' || param === 'GreaterThanLakh')
+    //         param_code = 3;
+    //     else
+    //         param_code = -1;
+
+    //     if(param_code !== -1)
+    //         filter.FilterBy(param, param_code);
+
+    //     e.preventDefault();
     
+    // });
 }
-
 EventListeners();

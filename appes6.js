@@ -11,18 +11,24 @@ class MetaData {
         this.totalAvgIncomeDivElement = document.getElementById('avg-income');
         this.totalExpenseDivElement = document.getElementById('total-expense');
         this.totalAvgExpenseDivElement = document.getElementById('avg-expense');
-        this.totalIncomeDivElement.innerHTML = `Total income: ${this.totalIncome}`;
+        this.totalIncomeDivElement.innerHTML = `Total income:
+         ${this.totalIncome}`;
         this.totalAvgIncomeDivElement.innerHTML = `Average income: 0`;
-        this.totalExpenseDivElement.innerHTML = `Total expense: ${this.totalExpense}`;
+        this.totalExpenseDivElement.innerHTML = `Total expense:
+         ${this.totalExpense}`;
         this.totalAvgExpenseDivElement.innerHTML = `Average expense: 0`;
     }
     ShowIncomeData() {
-        this.totalIncomeDivElement.innerHTML = `Total income: ${this.totalIncome}`;
-        this.totalAvgIncomeDivElement.innerHTML = `Average income: ${(this.totalIncome === 0 ? 0 : this.totalIncome / this.incomeNumbers)}`;
+        this.totalIncomeDivElement.innerHTML = `Total income:
+         ${this.totalIncome}`;
+        this.totalAvgIncomeDivElement.innerHTML = `Average income:
+         ${(this.totalIncome === 0 ? 0 : this.totalIncome / this.incomeNumbers)}`;
     }
     ShowExpenseData() {
-        this.totalExpenseDivElement.innerHTML = `Total expense: ${this.totalExpense}`;
-        this.totalAvgExpenseDivElement.innerHTML = `Average expense: ${(this.totalExpense === 0 ? 0 : this.totalExpense / this.expenseNumbers)}`;
+        this.totalExpenseDivElement.innerHTML = `Total expense:
+         ${this.totalExpense}`;
+        this.totalAvgExpenseDivElement.innerHTML = `Average expense:
+          ${(this.totalExpense === 0 ? 0 : this.totalExpense / this.expenseNumbers)}`;
     }
     AddIncome(amount) {
         this.totalIncome += Number(amount);
@@ -35,11 +41,15 @@ class MetaData {
         meta_data.ShowExpenseData();
     }
     DeleteIncome(amount) {
+        if (amount === undefined)
+            return;
         this.totalIncome -= Number(amount);
         this.incomeNumbers--;
         meta_data.ShowIncomeData();
     }
     DeleteExpense(amount) {
+        if (amount === undefined)
+            return;
         this.totalExpense -= Number(amount);
         this.expenseNumbers--;
         meta_data.ShowExpenseData();
@@ -57,21 +67,23 @@ class Transaction {
         meta_data.totalNumbers += 1;
     }
 }
-class Validate_data {
+class ValidateData {
     Validate(val) {
         let rows = val.split('\n');
         let header = rows[0].split(',');
         const ui = new UI();
-        if (header[0] !== 'I/E' || header[1] !== 'Date' || header[2] !== 'Name' || header[3] !== 'Amount') {
+        if (header[0] !== 'I/E' || header[1] !== 'Date' || header[2] !== 'Name'
+            || header[3] !== 'Amount') {
             console.log(header);
             ui.ShowAlert('Incorrect header of CSV', 'error');
             return false;
         }
-        if (rows.length == 1) {
-        }
+        // if(rows.length == 1){
+        // }
         for (let i = 1; i < rows.length; i++) {
             let data = rows[i].split(',');
-            if (data[0] === '' || data[1] === '' || data[2] === '' || data[3] === '') {
+            if (data[0] === '' || data[1] === '' || data[2] === '' ||
+                data[3] === '') {
                 ui.ShowAlert("Data missing at line " + i, 'error');
                 return false;
             }
@@ -122,19 +134,85 @@ class UI {
         }, 3000);
     }
     DeleteData(target) {
-        if (target.className === 'delete') {
+        let targetButton = target;
+        if (targetButton.className === 'delete' && targetButton.id !== undefined) {
             if (target.parentElement.parentElement.className === 'I') {
-                meta_data.DeleteIncome(meta_data.idAmountMap.get(Number(target.id)));
+                meta_data.DeleteIncome(meta_data.idAmountMap.get(Number(targetButton.id)));
             }
-            else if (target.parentElement.parentElement.className === 'E') {
-                meta_data.DeleteExpense(meta_data.idAmountMap.get(Number(target.id)));
+            else if (targetButton.parentElement.parentElement.className === 'E') {
+                meta_data.DeleteExpense(meta_data.idAmountMap.get(Number(targetButton.id)));
             }
-            target.parentElement.parentElement.remove();
+            targetButton.parentElement.parentElement.remove();
         }
     }
     //Clearing default fields
     ClearField() {
         this.csvInputElement.value = '';
+    }
+}
+class Sorting {
+    constructor() { }
+    ;
+    Compare(param, x, y) {
+        if ((param === 'I/E' || param === 'Description')
+            && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            return true;
+        }
+        if (param === 'Date') {
+            let date1 = x.innerHTML.split('/');
+            let date2 = y.innerHTML.split('/');
+            if ((date1[2].trim() + date1[1].trim() + date1[0].trim()) > (date2[2].trim() + date2[1].trim() + date2[0].trim()))
+                return true;
+        }
+        if (param === 'Amount' && Number(x.innerHTML) > Number(y.innerHTML)) {
+            return true;
+        }
+        return false;
+    }
+    SortTable(param, code) {
+        let sortParam = document.getElementById('sort-info').value;
+        let table = document.getElementById('data-table');
+        let switching = true;
+        let shouldSwitch = false;
+        let i;
+        let x, y;
+        while (switching) {
+            let rows = table.rows;
+            switching = false;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[code];
+                y = rows[i + 1].getElementsByTagName("TD")[code];
+                if (this.Compare(param, x, y)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+}
+class Filter {
+    FilterBy(param, param_code) {
+        let table = document.getElementById('data-table');
+        let rows = table.rows;
+        if (param === 'OnlyIncome') {
+            for (let i = 1; i < (rows.length - 1); i++) {
+                if (rows[i].getElementsByTagName("TD")[0].innerHTML !== 'I') {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+        else if (param === 'OnlyExpense') {
+            for (let i = 1; i < (rows.length - 1); i++) {
+                if (rows[i].getElementsByTagName("TD")[0].innerHTML !== 'E') {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
     }
 }
 function EventListeners() {
@@ -143,8 +221,7 @@ function EventListeners() {
     let doc = '';
     document.getElementById('data-form').addEventListener('submit', function (e) {
         doc = dataInputElement.value;
-        const valid = new Validate_data();
-        // Not checking csv data for now
+        const valid = new ValidateData();
         let isValid = valid.Validate(doc);
         const ui = new UI();
         if (!isValid) {
@@ -174,32 +251,39 @@ function EventListeners() {
         e.preventDefault();
     });
     // To sort the data
-    // document.getElementById('sort-info')!.addEventListener('change', function(e){
-    //     console.log((document.getElementById('sort-info')! as HTMLInputElement).value);
-    //     let sortParam : string =  (document.getElementById('sort-info') as HTMLInputElement).value;
-    //     let table: HTMLTableElement = document.getElementById('data-list');
-    //     let switching = true;
-    //     let shouldSwitch: boolean;
-    //     let i: number;
-    //     let x,y;
-    //     while(switching){
-    //         let rows = table.rows;
-    //         switching = false;
-    //         for (i = 1; i < (rows.length - 1); i++) {
-    //             shouldSwitch = false;
-    //             x = rows[i].getElementsByTagName("TD")[0];
-    //             y = rows[i + 1].getElementsByTagName("TD")[0];
-    //             console.log(x);
-    //             if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-    //               shouldSwitch = true;
-    //               break;
-    //             }
-    //           }
-    //           if (shouldSwitch) {
-    //             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-    //             switching = true;
-    //           }
-    //     }
-    // });
+    document.getElementById('sort-info').addEventListener('click', function (e) {
+        let param = document.getElementById('sort-info').value;
+        let param_code;
+        const sorting = new Sorting();
+        if (param === 'I/E')
+            param_code = 0;
+        else if (param === 'Date')
+            param_code = 1;
+        else if (param === 'Description')
+            param_code = 2;
+        else if (param === 'Amount')
+            param_code = 3;
+        else
+            param_code = -1;
+        if (param_code !== -1)
+            sorting.SortTable(param, param_code);
+        e.preventDefault();
+    });
+    // To filter the data
+    document.getElementById('sort-info').addEventListener('click', function (e) {
+        let param = document.getElementById('filter-info').value;
+        console.log(param);
+        let param_code;
+        const filter = new Filter();
+        if (param === 'OnlyIncome' || param === 'OnlyExpense')
+            param_code = 0;
+        else if (param === 'LessThanThousand' || param === 'LessThanLakh' || param === 'GreaterThanLakh')
+            param_code = 3;
+        else
+            param_code = -1;
+        if (param_code !== -1)
+            filter.FilterBy(param, param_code);
+        e.preventDefault();
+    });
 }
 EventListeners();

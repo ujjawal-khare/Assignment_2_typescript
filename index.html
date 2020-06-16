@@ -61,12 +61,22 @@
 
         <lable for = 'sort'> Sortby </lable>
         <select name = 'sortby' id = 'sort-info'>
-          <option value = 'None'>None</option>
+          <!-- <option value = 'None'>None</option> -->
           <option value = 'I/E'>I/E</option>
           <option value = 'Date'>Date</option>
           <option value = 'Description'>Description</option>
           <option value = 'Amount'>Amount</option>
-        </select>        
+        </select>
+        
+        <lable for = 'filter'> Filters </lable>
+        <select name = 'filterby' id = 'filter-info'>
+          <option value = 'None'>None</option>
+          <option value = 'OnlyIncome'>Only Income</option>
+          <option value = 'OnlyExpense'>Only Expense</option>
+          <option value = 'LessThanThousand'>Date</option>
+          <option value = 'LessThanLakh'>Description</option>
+          <option value = 'GreaterThanLakh'>Amount</option> 
+        </select>
 
         <table id ='data-table' class = "u-full-width">
             <thead>
